@@ -1,0 +1,270 @@
+import java.util.ArrayList;
+import java.util.List;
+
+public class Student {
+    private int id;
+    private String name;
+    private List<Grade> grades;
+
+    public Student(int id, String name) {
+        this.id = id;
+        this.name = name;
+        this.grades = new ArrayList<>();
+    }
+
+    // Getters and setters
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public List<Grade> getGrades() {
+        return grades;
+    }
+
+    public void setGrades(List<Grade> grades) {
+        this.grades = grades;
+    }
+
+    // Method to calculate GPA
+    public double calculateGPA() {
+        if (grades.isEmpty()) {
+            return 0.0;
+        }
+        double sum = 0.0;
+        for (Grade grade : grades) {
+            sum += grade.getGrade();
+        }
+        return sum / grades.size();
+    }
+
+    // Method to add a grade
+    public void addGrade(Course course, double gradeValue) {
+        Grade grade = new Grade(course, gradeValue);
+        grades.add(grade);
+    }
+
+    // Method to remove a grade
+    public void removeGrade(Course course) {
+        grades.removeIf(grade -> grade.getCourse().equals(course));
+    }
+
+    // Method to update a grade
+    public void updateGrade(Course course, double gradeValue) {
+        for (Grade grade : grades) {
+            if (grade.getCourse().equals(course)) {
+                grade.setGrade(gradeValue);
+                break;
+            }
+        }
+    }
+
+    // Method to display student information
+    public void displayStudentInfo() {
+        System.out.println("Student ID: " + id);
+        System.out.println("Name: " + name);
+        System.out.println("Grades:");
+        for (Grade grade : grades) {
+            System.out.println(grade.getCourse().getName() + ": " + grade.getGrade());
+        }
+        System.out.println("GPA: " + calculateGPA());
+    }
+}
+
+public class Course {
+    private String name;
+
+    public Course(String name) {
+        this.name = name;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+}
+
+public class Grade {
+    private Course course;
+    private double grade;
+
+    public Grade(Course course, double grade) {
+        this.course = course;
+        this.grade = grade;
+    }
+
+    public Course getCourse() {
+        return course;
+    }
+
+    public void setCourse(Course course) {
+        this.course = course;
+    }
+
+    public double getGrade() {
+        return grade;
+    }
+
+    public void setGrade(double grade) {
+        this.grade = grade;
+    }
+}
+
+import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
+
+public class StudentManagementSystem {
+    private List<Student> students;
+    private static final String FILENAME = "students.txt";
+
+    public StudentManagementSystem() {
+        this.students = new ArrayList<>();
+        loadStudentsFromFile();
+    }
+
+    // Method to load students from file
+    private void loadStudentsFromFile() {
+        try (BufferedReader reader = new BufferedReader(new FileReader(FILENAME))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] data = line.split(",");
+                int id = Integer.parseInt(data[0]);
+                String name = data[1];
+                Student student = new Student(id, name);
+                students.add(student);
+            }
+        } catch (IOException e) {
+            System.out.println("Error reading from file: " + e.getMessage());
+        }
+    }
+
+    // Method to save students to file
+    private void saveStudentsToFile() {
+        try (PrintWriter writer = new PrintWriter(new FileWriter(FILENAME))) {
+            for (Student student : students) {
+                writer.println(student.getId() + "," + student.getName());
+            }
+        } catch (IOException e) {
+            System.out.println("Error writing to file: " + e.getMessage());
+        }
+    }
+
+    // Method to add a new student
+    public void addStudent(int id, String name) {
+        Student newStudent = new Student(id, name);
+        students.add(newStudent);
+        saveStudentsToFile();
+    }
+
+    // Method to delete a student
+    public void deleteStudent(int studentId) {
+        students.removeIf(student -> student.getId() == studentId);
+        saveStudentsToFile();
+    }
+
+    // Method to update student information
+    public void updateStudent(int studentId, String newName) {
+        for (Student student : students) {
+            if (student.getId() == studentId) {
+                student.setName(newName);
+                saveStudentsToFile();
+                return;
+            }
+        }
+        System.out.println("Student with ID " + studentId + " not found");
+    }
+
+    // Method to add a grade for a student
+    public void addGrade(int studentId, Course course, double grade) {
+        for (Student student : students) {
+            if (student.getId() == studentId) {
+                student.addGrade(course, grade);
+                saveStudentsToFile();
+                return;
+            }
+        }
+        System.out.println("Student with ID " + studentId + " not found");
+    }
+
+    // Method to remove a grade for a student
+    public void removeGrade(int studentId, Course course) {
+        for (Student student : students) {
+            if (student.getId() == studentId) {
+                student.removeGrade(course);
+                saveStudentsToFile();
+                return;
+            }
+        }
+        System.out.println("Student with ID " + studentId + " not found");
+    }
+
+    // Method to update a grade for a student
+    public void updateGrade(int studentId, Course course, double newGrade) {
+        for (Student student : students) {
+            if (student.getId() == studentId) {
+                student.updateGrade(course, newGrade);
+                saveStudentsToFile();
+                return;
+            }
+        }
+        System.out.println("Student with ID " + studentId + " not found");
+    }
+
+    // Method to display student information
+    public void displayStudentInfo(int studentId) {
+        for (Student student : students) {
+            if (student.getId() == studentId) {
+                student.displayStudentInfo();
+                return;
+            }
+        }
+        System.out.println("Student with ID " + studentId + " not found");
+    }
+
+    // Method to display all students
+    public void displayAllStudents() {
+        for (Student student : students) {
+            System.out.println("ID: " + student.getId() + ", Name: " + student.getName());
+        }
+    }
+
+    // Main method for testing
+    public static void main(String[] args) {
+        StudentManagementSystem system = new StudentManagementSystem();
+
+        // Sample operations for testing
+        system.addStudent(1, "Alice");
+        system.addStudent(2, "Bob");
+
+        Course mathCourse = new Course("Math");
+        Course physicsCourse = new Course("Physics");
+
+        system.addGrade(1, mathCourse, 85);
+        system.addGrade(1, physicsCourse, 90);
+        system.addGrade(2, mathCourse, 75);
+        system.addGrade(2, physicsCourse, 80);
+
+        system.displayStudentInfo(1);
+        system.displayStudentInfo(2);
+
+        system.deleteStudent(2);
+
+        system.displayAllStudents();
+    }
+}
